@@ -119,31 +119,9 @@ The assistant can use these tools to retrieve information directly from the conf
 
 MCP Workspace Context connects an AI assistant to a local project through the Model Context Protocol.
 
-### How It Works
-
-```text
-       AI Assistant (Cursor)
-                |
-                | MCP Tool Requests
-                | (stdio)
-                v
-       MCP Workspace Context
-             MCP Server
-                |
-                | Executes Analysis Tools
-                v
-         Local Project Files
-                |
-                | File Contents,
-                | Imports, Structure,
-                | Search Matches
-                v
-       MCP Workspace Context
-                |
-                | Structured Tool Results
-                v
-           AI Assistant
-```
+<div align="center">
+  <img src="assets/arch.png" alt="Architecture" width="700">
+</div>
 
 ### Core Components
 
