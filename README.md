@@ -1,91 +1,189 @@
+
 # MCP Server for Codebase Analysis
 
-Model Context Protocol (MCP) server that gives your AI assistant structured tools to read, search, and understand any codebase. Connect it once and your assistant can map entry points, trace imports, detect the stack, and grep across the repo without you doing any of it manually.
+**MCP Workspace Context** is a Model Context Protocol (MCP) server that helps AI assistants read, search, and understand local codebases through structured tools.
 
-Built for developers who want their AI assistant to actually understand the project, not just guess at it.
+Connect it to an MCP-compatible AI assistant, such as Cursor, to explore project structure, find entry points, trace dependencies, identify technologies, and search source code without manually copying files into the chat.
 
-![Logo](assets/mcp.png)
+Built for developers who want their AI assistants to understand the actual project rather than guess how it works.
 
----
-
-## What It Can Do
-
-- **Find Entry Points:** scans the workspace for `index.ts`, `main.py`, `Dockerfile`, and similar files
-- **List Dependencies:** traces all local imports inside a given file
-- **Summarize Folder:** identifies the role of a folder (API layer, models, utilities, tests, etc.)
-- **Read File:** reads any file in the workspace, sandboxed to the project root
-- **Get File Tree:** returns the full directory structure, filtered by `.gitignore`
-- **Detect Stack:** reads `package.json`, `Dockerfile`, `requirements.txt`, `go.mod`, etc. to identify the tech stack
-- **Search Code:** searches all files for a keyword or regex, returns matches with file path and line number
-- **Find TODOs:** collects every `TODO`, `FIXME`, `HACK`, and `NOTE` comment, grouped by file
+<div align="center">
+  <img src="assets/mcp.png" alt="MCP Workspace Context" width="700">
+</div>
 
 ---
 
-## Setup
+## Features
 
-**Requirements:** Node.js v18+ and npm
+MCP Workspace Context provides eight tools for codebase analysis:
+
+| Tool | Description |
+|------|-------------|
+| **Find Entry Points** | Finds common entry files such as `index.ts`, `main.py`, `Dockerfile`, and others. |
+| **List Dependencies** | Identifies local imports used by a specific file. |
+| **Summarize Folder** | Examines a folder and identifies its likely purpose, such as API, models, utilities, or tests. |
+| **Read File** | Reads file contents while restricting access to the configured workspace root. |
+| **Get File Tree** | Generates the project directory structure while respecting `.gitignore` patterns. |
+| **Detect Stack** | Examines configuration files such as `package.json`, `requirements.txt`, and `go.mod` to identify technologies. |
+| **Search Code** | Searches source files using keywords or regular expressions, returning file paths and line numbers. |
+| **Find TODOs** | Finds `TODO`, `FIXME`, `HACK`, and `NOTE` comments, grouped by file. |
+
+---
+
+## Installation
+
+### Prerequisites
+
+- Node.js v18 or later
+- npm
+- An MCP-compatible AI assistant, such as Cursor
+
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/bhavjsh/code-atlas.git
-cd code-atlas
+git clone https://github.com/bhavjsh/MCP-Workspace-Context.git
+cd MCP-Workspace-Context
+```
+
+### 2. Install Dependencies
+
+```bash
 npm install
+```
+
+### 3. Build the Project
+
+```bash
 npm run build
 ```
 
+This compiles the TypeScript source code into JavaScript in the `dist/` directory.
+
 ---
 
-## Using It on Your Project
+## Configuration
 
-**1. Add Code Atlas to Cursor**
+### Connect to Cursor
 
-Go to **Cursor Settings > MCP** and add this. Set `cwd` to the root of the project you want to analyse.
+1. Open **Cursor Settings > MCP**.
+2. Add a new MCP server configuration.
+3. Set the command to Node.js and provide the absolute path to the compiled server.
+4. Set `cwd` to the root directory of the project you want to analyze.
+
+Example configuration:
 
 ```json
 {
   "mcpServers": {
-    "code-atlas": {
+    "mcp-workspace-context": {
       "command": "node",
-      "args": ["/path/to/code-atlas/dist/index.js"],
-      "cwd": "/path/to/your-project"
+      "args": [
+        "/absolute/path/to/MCP-Workspace-Context/dist/index.js"
+      ],
+      "cwd": "/absolute/path/to/your-project"
     }
   }
 }
 ```
 
-Restart Cursor. The tools are now active in your agent panel.
+**Note:**
+- Replace the example paths with actual absolute paths on your system.
+- On Windows, use escaped backslashes (`\\`) or forward slashes (`/`) in JSON paths.
+- The `cwd` property determines which project the server analyzes.
+- Restart Cursor or reload the MCP configuration after making changes.
 
-**2. Just ask questions, the assistant does the rest**
+Once connected, the available tools can be accessed by the AI assistant.
 
-| What you ask | What it does |
-|---|---|
-| "Show me the file structure" | Maps the entire directory tree |
-| "What stack is this project using?" | Reads config files and lists technologies |
-| "Where is auth handled?" | Searches every file for the keyword |
-| "What are the entry points?" | Finds all main/index/app files |
-| "What TODOs are left?" | Lists every TODO and FIXME across the repo |
-| "What does this file import?" | Traces all local imports in a file |
-| "What is the role of this folder?" | Labels it by architectural purpose |
+---
 
-No file pasting, no manual searching. The assistant reads the project directly.
+## Usage
+
+Ask your AI assistant questions about the connected project.
+
+| Example Prompt | Expected Action |
+|----------------|-----------------|
+| "Show me the project structure." | Retrieves the directory tree. |
+| "What technologies does this project use?" | Detects the technology stack. |
+| "Where is authentication implemented?" | Searches relevant source files. |
+| "What are the entry points?" | Identifies common application entry files. |
+| "Find all TODO comments." | Lists TODOs and FIXMEs across the codebase. |
+| "What does this file import?" | Identifies local dependencies. |
+| "What is the purpose of this folder?" | Summarizes the folder's likely role. |
+| "Read the package.json file." | Returns the requested file's contents. |
+
+The assistant can use these tools to retrieve information directly from the configured workspace, reducing the need to manually share source files.
 
 ---
 
 ## Architecture
 
-**Transport:** MCP stdio
+MCP Workspace Context connects an AI assistant to a local project through the Model Context Protocol.
 
-**Validation:** Zod on all tool inputs
+### How It Works
 
-**Security:** Every file path is resolved and checked against the workspace root before any read happens
+```text
+       AI Assistant (Cursor)
+                |
+                | MCP Tool Requests
+                | (stdio)
+                v
+       MCP Workspace Context
+             MCP Server
+                |
+                | Executes Analysis Tools
+                v
+         Local Project Files
+                |
+                | File Contents,
+                | Imports, Structure,
+                | Search Matches
+                v
+       MCP Workspace Context
+                |
+                | Structured Tool Results
+                v
+           AI Assistant
+```
 
-**Filtering:** `.gitignore` patterns are loaded at runtime and applied to all file walks
+### Core Components
+
+**1. MCP Server**
+
+The main entry point, `src/index.ts`, initializes the MCP server and exposes the available codebase analysis tools.
+
+**2. Analysis Tools**
+
+The `src/tools/` directory contains the tools responsible for reading files, searching code, analyzing dependencies, detecting the technology stack, and exploring project structure.
+
+**3. Workspace Security**
+
+The `src/utils/sandbox.ts` utility resolves file paths and checks that they remain within the configured workspace root before file access.
+
+**4. Gitignore Filtering**
+
+The `src/utils/gitignore.ts` utility loads `.gitignore` patterns to exclude ignored files and directories during file traversal.
+
+### Technical Details
+
+| Component | Implementation |
+|-----------|----------------|
+| Protocol | Model Context Protocol (MCP) |
+| Transport | Standard Input/Output (`stdio`) |
+| Runtime | Node.js |
+| Language | TypeScript |
+| MCP Integration | `@modelcontextprotocol/sdk` |
+| Input Validation | Zod |
+| File Access | Workspace-root path validation |
+| File Filtering | Runtime `.gitignore` pattern matching |
 
 ---
 
 ## Project Structure
 
-```
-code-atlas/
+```text
+MCP-Workspace-Context/
+├── assets/
+│   └── mcp.png
 ├── src/
 │   ├── index.ts
 │   ├── tools/
@@ -100,6 +198,10 @@ code-atlas/
 │   └── utils/
 │       ├── sandbox.ts
 │       └── gitignore.ts
+├── .gitignore
+├── LICENSE
+├── README.md
+├── package-lock.json
 ├── package.json
 └── tsconfig.json
 ```
@@ -108,13 +210,65 @@ code-atlas/
 
 ## Tech Stack
 
-- Node.js
-- TypeScript
-- [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk)
-- [zod](https://github.com/colinhacks/zod)
+- **Node.js** — JavaScript runtime for executing the MCP server.
+- **TypeScript** — Provides type safety and maintainable source code.
+- **[@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk)** — Implements MCP server functionality and tool communication.
+- **[Zod](https://github.com/colinhacks/zod)** — Validates tool inputs.
+- **tsx** — Runs TypeScript during development.
+
+---
+
+## Development
+
+Install project dependencies:
+
+```bash
+npm install
+```
+
+Run the server in development mode:
+
+```bash
+npm run dev
+```
+
+Compile TypeScript:
+
+```bash
+npm run build
+```
+
+Run the compiled server:
+
+```bash
+npm start
+```
+
+The server communicates through standard input and output using MCP. It is intended to be launched by an MCP-compatible client rather than used as a conventional interactive terminal application.
+
+---
+
+## Security
+
+MCP Workspace Context includes safeguards for local codebase access:
+
+- **Workspace Boundaries:** File paths are resolved and checked against the configured workspace root.
+- **Input Validation:** Tool inputs are validated using Zod.
+- **Gitignore Support:** Ignored files and directories are excluded from supported file traversal operations.
+- **Local Analysis:** The server operates on the configured local project directory.
+
+**Important:** Connect the server only to trusted MCP clients and configure its workspace to a directory you intend to make accessible for analysis.
 
 ---
 
 ## License
 
-MIT
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Author
+
+Developed by [Bhavini Joshi](https://github.com/bhavjsh).
+
+**Repository:** [MCP-Workspace-Context](https://github.com/bhavjsh/MCP-Workspace-Context)
