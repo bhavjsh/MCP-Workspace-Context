@@ -4,7 +4,7 @@ Code Atlas is a Model Context Protocol (MCP) server that gives your AI assistant
 
 Built for developers who want their AI assistant to actually understand the project, not just guess at it.
 
-![Architecture](assets/architecture.svg)
+![Logo](assets/web-coding.png)
 
 ---
 
