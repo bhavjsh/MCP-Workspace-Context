@@ -1,6 +1,6 @@
 # MCP Server for Codebase Analysis
 
-Code Atlas is a Model Context Protocol (MCP) server that gives your AI assistant structured tools to read, search, and understand any codebase. Connect it once and your assistant can map entry points, trace imports, detect the stack, and grep across the repo without you doing any of it manually.
+Model Context Protocol (MCP) server that gives your AI assistant structured tools to read, search, and understand any codebase. Connect it once and your assistant can map entry points, trace imports, detect the stack, and grep across the repo without you doing any of it manually.
 
 Built for developers who want their AI assistant to actually understand the project, not just guess at it.
 
